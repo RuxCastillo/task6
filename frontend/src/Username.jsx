@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AppContext } from './store/context';
 
 export default function Username() {
 	const [username, setUsername] = useState('');
 	const navigate = useNavigate();
+	const { dispatch } = useContext(AppContext);
 
 	function handleUsername(e) {
 		setUsername(e.target.value);
 	}
 
 	function handleContinue() {
+		dispatch({ type: 'setUsername', payload: username });
 		navigate('/start');
 	}
 
