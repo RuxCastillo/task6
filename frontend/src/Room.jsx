@@ -14,6 +14,7 @@ export default function Room() {
 			index === currentSlideIndex ? { ...slide, ...updateData } : slide
 		);
 		setSlides(updatedSlides);
+		console.log(slides);
 	}
 
 	function addSlide() {
@@ -49,10 +50,16 @@ export default function Room() {
 				<button onClick={addSlide}>+ Add Slide</button>
 			</section>
 			<section>
-				<Slide
-					slideData={slides[currentSlideIndex]}
-					onUpdateSlide={handleUpdateSlide}
-				/>
+				{slides.map((slide, index) => {
+					if (index !== currentSlideIndex) return null;
+					return (
+						<Slide
+							key={index}
+							slideData={slide}
+							onUpdateSlide={handleUpdateSlide}
+						/>
+					);
+				})}
 			</section>
 			<section>users</section>
 		</main>

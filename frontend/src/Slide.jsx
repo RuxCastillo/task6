@@ -10,7 +10,6 @@ const Slide = ({ slideData, onUpdateSlide }) => {
 			y: 50,
 			text: 'Nuevo texto',
 			fontSize: 20,
-			draggable: true,
 		};
 		const updatedTextBlocks = [...slideData.textBlocks, newTextBlock];
 		onUpdateSlide({ textBlocks: updatedTextBlocks });
@@ -20,6 +19,13 @@ const Slide = ({ slideData, onUpdateSlide }) => {
 	const handleTextChange = (id, newText) => {
 		const updatedTextBlocks = slideData.textBlocks.map((block) =>
 			block.id === id ? { ...block, text: newText } : block
+		);
+		onUpdateSlide({ textBlocks: updatedTextBlocks });
+	};
+
+	const handleDragEnd = (id, x, y) => {
+		const updatedTextBlocks = slideData.textBlocks.map((block) =>
+			block.id === id ? { ...block, x, y } : block
 		);
 		onUpdateSlide({ textBlocks: updatedTextBlocks });
 	};
@@ -34,12 +40,23 @@ const Slide = ({ slideData, onUpdateSlide }) => {
 			>
 				<Layer>
 					{slideData.textBlocks.map((block) => (
-						<Group key={block.id} x={block.x} y={block.y} draggable>
+						<Group
+							key={block.id}
+							x={block.x}
+							y={block.y}
+							draggable
+							onDragEnd={(e) =>
+								handleDragEnd(block.id, e.target.x(), e.target.y())
+							} // Línea agregada para manejar el final del arrastre
+							onClick={console.log('click')}
+						>
 							<Text
+								key={block.id}
 								text={block.text}
 								fontSize={block.fontSize}
-								onDblClick={(e) => {
+								onClick={(e) => {
 									// Habilitar edición al hacer doble clic
+									console.log('Doble clic');
 									const textNode = e.target;
 									textNode.hide(); // Ocultar el texto para mostrar un input
 									const textPosition = textNode.absolutePosition();
