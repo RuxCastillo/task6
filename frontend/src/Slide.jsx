@@ -45,6 +45,7 @@ const Slide = ({ slideData, onUpdateSlide }) => {
 							x={block.x}
 							y={block.y}
 							draggable
+							fill={'#fff'}
 							onDragEnd={(e) =>
 								handleDragEnd(block.id, e.target.x(), e.target.y())
 							} // Línea agregada para manejar el final del arrastre
