@@ -10,8 +10,11 @@ function reducer(state, action) {
 	switch (action.type) {
 		case 'setUsername':
 			return { ...state, username: action.payload };
-		case 'setRooms':
-			return { ...state, rooms: action.payload };
+		case 'setRoom':
+			return {
+				...state,
+				rooms: [...state.rooms, action.payload],
+			};
 		case 'setCurrentRoom':
 			return { ...state, currentRoom: action.payload };
 		default:

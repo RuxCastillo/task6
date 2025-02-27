@@ -7,9 +7,11 @@ export default function Start() {
 	const { state, dispatch } = useContext(AppContext);
 
 	function handleCreateRoom() {
-		dispatch({ type: 'setRoom', payload: username });
+		dispatch({ type: 'setRoom', payload: state.username });
 		navigate('/room');
 	}
+
+	console.log(state);
 
 	return (
 		<main>
@@ -33,6 +35,9 @@ export default function Start() {
 			<div>
 				<ul className="ml-10">
 					Active Rooms
+					{state.rooms.map((room) => (
+						<li key={room}>{room}</li>
+					))}
 					<li>1 la primera</li>
 					<li>2 la segunda</li>
 				</ul>
