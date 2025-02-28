@@ -2,7 +2,7 @@ import { createContext, useReducer } from 'react';
 
 const initialState = {
 	username: '',
-	rooms: [],
+	rooms: {},
 	currentRoom: null,
 };
 
@@ -13,10 +13,17 @@ function reducer(state, action) {
 		case 'setRoom':
 			return {
 				...state,
-				rooms: [...state.rooms, action.payload],
+				rooms: { ...state.rooms, ...action.payload },
 			};
 		case 'setCurrentRoom':
+			console.log('setCurrentRoom', action.payload);
 			return { ...state, currentRoom: action.payload };
+		case 'updateSlide':
+			console.log('desde el useREducer', state.currentRoom, action.payload);
+			return {
+				...state,
+				rooms: { ...state.rooms, [state.currentRoom]: action.payload },
+			};
 		default:
 			return state;
 	}

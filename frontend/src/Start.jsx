@@ -7,11 +7,23 @@ export default function Start() {
 	const { state, dispatch } = useContext(AppContext);
 
 	function handleCreateRoom() {
-		dispatch({ type: 'setRoom', payload: state.username });
-		navigate('/room');
+		dispatch({ type: 'setCurrentRoom', payload: state.username });
+		dispatch({
+			type: 'setRoom',
+			payload: { [state.username]: [{ title: 'slide1', textBlocks: [] }] },
+		});
+		navigate(`/room/${state.username}`);
+	}
+
+	function joinRoom(username) {
+		console.log('antes del dispatch');
+		dispatch({ type: 'setCurrentRoom', payload: username });
+		navigate(`/room/${username}`);
 	}
 
 	console.log(state);
+
+	const arrayRooms = Object.keys(state.rooms);
 
 	return (
 		<main>
@@ -35,8 +47,10 @@ export default function Start() {
 			<div>
 				<ul className="ml-10">
 					Active Rooms
-					{state.rooms.map((room) => (
-						<li key={room}>{room}</li>
+					{arrayRooms.map((room) => (
+						<li key={room} onClick={() => joinRoom(room)}>
+							{room}
+						</li>
 					))}
 					<li>1 la primera</li>
 					<li>2 la segunda</li>

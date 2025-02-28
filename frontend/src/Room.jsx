@@ -2,15 +2,28 @@ import Slide from './Slide';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import { useParams } from 'react-router-dom';
+import { AppContext } from './store/context';
+import { useContext } from 'react';
 
 const socket = io('http://localhost:3000');
 
 export default function Room() {
+	const { state, dispatch } = useContext(AppContext);
+	const { room } = useParams();
+	console.log('room: ', room);
+
 	const [slides, setSlides] = useState([
-		{ title: 'slide1', textBlocks: [] },
-		{ title: 'slide2', textBlocks: [] },
+		{
+			slide: 'slide2',
+			textBlocks: [],
+		},
 	]);
 	const navigate = useNavigate();
+
+	if (state.username === '') {
+		navigate('/');
+	}
 
 	const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -30,22 +43,33 @@ export default function Room() {
 	}, []);
 
 	function handleUpdateSlide(updateData) {
-		const updatedSlides = slides.map((slide, index) =>
+		const updatedSlides = state.rooms[room].map((slide, index) =>
 			index === currentSlideIndex ? { ...slide, ...updateData } : slide
 		);
+		console.log(updatedSlides);
+		dispatch({ type: 'updateSlide', payload: updatedSlides });
 		setSlides(updatedSlides);
-		socket.emit('message', updatedSlides);
-		console.log(slides);
+		setTimeout(() => {
+			console.log(state.rooms[room]);
+		}, 2000);
 	}
 
 	function addSlide() {
-		const newSlide = { title: `Slide ${slides.length + 1}`, textBlocks: [] };
+		const newSlide = {
+			title: `Slide ${state.rooms[room].length + 1}`,
+			textBlocks: [],
+		};
+		dispatch({
+			type: 'updateSlide',
+			payload: [...state.rooms[room], newSlide],
+		});
 		setSlides([...slides, newSlide]);
-		setCurrentSlideIndex(slides.length);
 	}
 
 	function deleteSlide(index) {
-		const updatedSlides = slides.filter((_, i) => i !== index);
+		console.log(index, 'index');
+		const updatedSlides = state.rooms[room].filter((_, i) => i !== index);
+		dispatch({ type: 'updateSlide', payload: updatedSlides });
 		setSlides(updatedSlides);
 		if (currentSlideIndex >= updatedSlides.length) {
 			setCurrentSlideIndex(updatedSlides.length - 1);
@@ -61,6 +85,8 @@ export default function Room() {
 		navigate('/start');
 	}
 
+	console.log(state.rooms[room]);
+
 	return (
 		<main className="flex items-center h-screen justify-around">
 			<h1 className="absolute top-4 left-4" onClick={handleClickInicio}>
@@ -68,26 +94,30 @@ export default function Room() {
 			</h1>
 			<section>
 				<ul>
-					{slides.map((slide, index) => (
-						<li key={index}>
-							<button onClick={() => selectSlide(index)}>{slide.title}</button>
-							<button onClick={() => deleteSlide(index)}>🗑️</button>
-						</li>
-					))}
+					{state.rooms[room] &&
+						state.rooms[room].map((slide, index) => (
+							<li key={index}>
+								<button onClick={() => selectSlide(index)}>
+									{slide.title}
+								</button>
+								<button onClick={() => deleteSlide(index)}>🗑️</button>
+							</li>
+						))}
 				</ul>
 				<button onClick={addSlide}>+ Add Slide</button>
 			</section>
 			<section>
-				{slides.map((slide, index) => {
-					if (index !== currentSlideIndex) return null;
-					return (
-						<Slide
-							key={index}
-							slideData={slide}
-							onUpdateSlide={handleUpdateSlide}
-						/>
-					);
-				})}
+				{state.rooms[room] &&
+					state.rooms[room].map((slide, index) => {
+						if (index !== currentSlideIndex) return null;
+						return (
+							<Slide
+								key={index}
+								slideData={state.rooms[room][index]}
+								onUpdateSlide={handleUpdateSlide}
+							/>
+						);
+					})}
 			</section>
 			<section>users</section>
 		</main>
