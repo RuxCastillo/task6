@@ -59,12 +59,18 @@ app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
 });
 
+let informationBefore;
 io.on('connection', (socket) => {
 	console.log('Usuario conectado');
 
 	socket.on('message', (data) => {
 		console.log(data);
+		informationBefore = data;
 		socket.broadcast.emit('message', data);
+	});
+
+	socket.on('participants', () => {
+		socket.emit('participants', informationBefore);
 	});
 
 	socket.on('disconnect', () => {

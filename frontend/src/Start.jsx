@@ -39,11 +39,20 @@ export default function Start() {
 			dispatch({ type: 'reciboMessage', payload: data });
 			setSlides(data);
 		});
+		socket.on('participants', (data) => {
+			console.log('esta es la data del participants', data);
+			dispatch({ type: 'reciboMessage', payload: data });
+		});
+		socket.emit('participants');
 
 		return () => {
 			socket.off('connect');
 		};
 	}, []);
+
+	function refresh() {
+		socket.emit('participants');
+	}
 
 	console.log(state);
 
@@ -64,7 +73,10 @@ export default function Start() {
 				>
 					Create room
 				</button>
-				<button className="px-2 py-1 border-2 border-solid border-black rounded mr-10">
+				<button
+					className="px-2 py-1 border-2 border-solid border-black rounded mr-10"
+					onClick={refresh}
+				>
 					Refresh
 				</button>
 			</div>
