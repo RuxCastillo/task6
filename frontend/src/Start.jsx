@@ -1,10 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from './store/context';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000');
 
 export default function Start() {
 	const navigate = useNavigate();
 	const { state, dispatch } = useContext(AppContext);
+	const [slides, setSlides] = useState({});
 
 	function handleCreateRoom() {
 		dispatch({ type: 'setCurrentRoom', payload: state.username });
@@ -20,6 +24,26 @@ export default function Start() {
 		dispatch({ type: 'setCurrentRoom', payload: username });
 		navigate(`/room/${username}`);
 	}
+
+	if (state.username === '') {
+		navigate('/');
+	}
+
+	useEffect(() => {
+		socket.on('connect', (data) => {
+			console.log('Connected to server fron start.jsx');
+			dispatch({ type: 'reciboMessage', payload: data });
+		});
+		socket.on('message', (data) => {
+			console.log('esta es la data del message', data);
+			dispatch({ type: 'reciboMessage', payload: data });
+			setSlides(data);
+		});
+
+		return () => {
+			socket.off('connect');
+		};
+	}, []);
 
 	console.log(state);
 

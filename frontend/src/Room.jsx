@@ -11,29 +11,21 @@ const socket = io('http://localhost:3000');
 export default function Room() {
 	const { state, dispatch } = useContext(AppContext);
 	const { room } = useParams();
-	console.log('room: ', room);
-
-	const [slides, setSlides] = useState([
-		{
-			slide: 'slide2',
-			textBlocks: [],
-		},
-	]);
+	const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 	const navigate = useNavigate();
+	const [flag, setFlag] = useState(true);
 
 	if (state.username === '') {
 		navigate('/');
 	}
 
-	const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
 	useEffect(() => {
 		socket.on('connect', () => {
-			console.log('Connected to server');
+			console.log('Connected to server from room.jsx');
 		});
 		socket.on('message', (data) => {
-			console.log(data);
-			setSlides(data);
+			console.log('mensaje recibido socket on message', data);
+			dispatch({ type: 'reciboMessage', payload: data });
 		});
 
 		return () => {
@@ -42,16 +34,20 @@ export default function Room() {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (flag) {
+			socket.emit('message', state.rooms);
+			setFlag(false);
+		}
+	}, [state.rooms]);
+
 	function handleUpdateSlide(updateData) {
 		const updatedSlides = state.rooms[room].map((slide, index) =>
 			index === currentSlideIndex ? { ...slide, ...updateData } : slide
 		);
 		console.log(updatedSlides);
 		dispatch({ type: 'updateSlide', payload: updatedSlides });
-		setSlides(updatedSlides);
-		setTimeout(() => {
-			console.log(state.rooms[room]);
-		}, 2000);
+		setFlag(true);
 	}
 
 	function addSlide() {
@@ -63,14 +59,12 @@ export default function Room() {
 			type: 'updateSlide',
 			payload: [...state.rooms[room], newSlide],
 		});
-		setSlides([...slides, newSlide]);
 	}
 
 	function deleteSlide(index) {
 		console.log(index, 'index');
 		const updatedSlides = state.rooms[room].filter((_, i) => i !== index);
 		dispatch({ type: 'updateSlide', payload: updatedSlides });
-		setSlides(updatedSlides);
 		if (currentSlideIndex >= updatedSlides.length) {
 			setCurrentSlideIndex(updatedSlides.length - 1);
 		}
@@ -78,14 +72,11 @@ export default function Room() {
 
 	function selectSlide(index) {
 		setCurrentSlideIndex(index);
-		console.log(slides);
 	}
 
 	function handleClickInicio() {
 		navigate('/start');
 	}
-
-	console.log(state.rooms[room]);
 
 	return (
 		<main className="flex items-center h-screen justify-around">
@@ -119,7 +110,10 @@ export default function Room() {
 						);
 					})}
 			</section>
-			<section>users</section>
+			<section>
+				users
+				{room === state.username && <button>eliminar room</button>}
+			</section>
 		</main>
 	);
 }

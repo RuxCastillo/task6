@@ -24,6 +24,14 @@ function reducer(state, action) {
 				...state,
 				rooms: { ...state.rooms, [state.currentRoom]: action.payload },
 			};
+		case 'reciboMessage':
+			return {
+				...state,
+				rooms: {
+					...state.rooms,
+					...action.payload,
+				},
+			};
 		default:
 			return state;
 	}
